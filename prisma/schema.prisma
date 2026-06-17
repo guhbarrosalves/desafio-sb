@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Membro {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  cargo     String
+  cartoes   Cartao[]
+}
+
+model Projeto {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  prazo     DateTime
+  criadoEm  DateTime @default(now())
+  cartoes   Cartao[]
+}
+
+model Cartao {
+  id          Int       @id @default(autoincrement())
+  titulo      String
+  descricao   String?
+  status      String    @default("todo")
+  iniciadoEm  DateTime?
+  criadoEm    DateTime  @default(now())
+  membroId    Int?
+  membro      Membro?   @relation(fields: [membroId], references: [id])
+  projetoId   Int
+  projeto     Projeto   @relation(fields: [projetoId], references: [id])
+}
