@@ -14,6 +14,7 @@ async function main() {
   
   await prisma.membro.createMany({
     data: [
+      { nome: "Ricardo",          cargo: "Gestor"},
       { nome: "João Pedro",       cargo: "Desenvolvedor Frontend Sênior" },
       { nome: "Estevão",          cargo: "Desenvolvedor Backend Sênior" },
       { nome: "Matheus Ferreira", cargo: "Desenvolvedor Frontend Júnior" },
