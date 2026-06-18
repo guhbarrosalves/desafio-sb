@@ -1,88 +1,65 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import KanbanBoard from '@/app/components/KanBanBoard'
-import KpiPanel from '@/app/components/KpiPainel'
-import SeletorUsuario from '@/app/components/SeletorUsuario'
-import PainelFuncionario from '@/app/components/PainelFuncionario'
-import ModalNovoCartao from '@/app/components/ModalNovoCartao'
+
+type Cartao = {
+  id: number
+  titulo: string
+  status: string
+}
 
 type Membro = {
   id: number
   nome: string
   cargo: string
+  cartoes: Cartao[]
 }
 
-export default function Home() {
-  const [usuario, setUsuario] = useState<Membro | null>(null)
-  const [modalAberto, setModalAberto] = useState(false)
-  const [recarregar, setRecarregar] = useState(0)
+export default function Funcionarios() {
+  const [membros, setMembros] = useState<Membro[]>([])
 
   useEffect(() => {
-    const salvo = localStorage.getItem('usuario')
-    if (salvo) {
-      setUsuario(JSON.parse(salvo))
-    }
+    fetch('/api/membros')
+      .then(res => res.json())
+      .then(setMembros)
   }, [])
-
-  function handleSelecionar(membro: Membro) {
-    localStorage.setItem('usuario', JSON.stringify(membro))
-    setUsuario(membro)
-  }
-
-  function handleSair() {
-    localStorage.removeItem('usuario')
-    setUsuario(null)
-  }
-
-  function handleCriado() {
-    setRecarregar(r => r + 1)
-  }
-
-  if (!usuario) {
-    return <SeletorUsuario onSelecionar={handleSelecionar} />
-  }
-
-  const ehGestor = usuario.cargo === 'Gestor'
-
-  if (ehGestor) {
-    return (
-      <main className="min-h-screen p-6 bg-gray-50">
-        {modalAberto && (
-          <ModalNovoCartao
-            onFechar={() => setModalAberto(false)}
-            onCriado={handleCriado}
-          />
-        )}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Painel do Time</h1>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setModalAberto(true)}
-              className="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              + Novo cartao
-            </button>
-            <span className="text-sm text-gray-500">Ola, <span className="font-medium text-gray-700">{usuario.nome}</span></span>
-            <button onClick={handleSair} className="text-sm text-red-500 hover:underline">Sair</button>
-          </div>
-        </div>
-        <KpiPanel key={recarregar} />
-        <KanbanBoard key={recarregar + 1000} />
-      </main>
-    )
-  }
 
   return (
     <main className="min-h-screen p-6 bg-gray-50">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Meu Painel</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">Ola, <span className="font-medium text-gray-700">{usuario.nome}</span></span>
-          <button onClick={handleSair} className="text-sm text-red-500 hover:underline">Sair</button>
-        </div>
+      <div className="mb-6">
+        <a href="/" className="text-sm text-blue-500 hover:underline">{'< Voltar'}</a>
+        <h1 className="text-2xl font-bold text-gray-800 mt-2">Funcionarios</h1>
       </div>
-      <PainelFuncionario usuario={usuario} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {membros.map(membro => {
+          const ativos = membro.cartoes.filter(c => c.status !== 'done')
+          const concluidos = membro.cartoes.filter(c => c.status === 'done')
+
+          return (
+            <div key={membro.id} className="bg-white rounded-xl shadow p-4">
+              <h2 className="text-lg font-semibold text-gray-800">{membro.nome}</h2>
+              <p className="text-sm text-gray-500 mb-3">{membro.cargo}</p>
+
+              <div className="mb-3">
+                <h3 className="text-xs font-medium text-gray-400 uppercase mb-1">Ativos ({ativos.length})</h3>
+                {ativos.length === 0 && <p className="text-sm text-gray-400">Nenhum cartao ativo</p>}
+                {ativos.map(c => (
+                  <p key={c.id} className="text-sm text-gray-700">{c.titulo}</p>
+                ))}
+              </div>
+
+              <div>
+                <h3 className="text-xs font-medium text-gray-400 uppercase mb-1">Concluidos ({concluidos.length})</h3>
+                {concluidos.length === 0 && <p className="text-sm text-gray-400">Nenhum cartao concluido</p>}
+                {concluidos.map(c => (
+                  <p key={c.id} className="text-sm text-gray-700">{c.titulo}</p>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </main>
   )
 }

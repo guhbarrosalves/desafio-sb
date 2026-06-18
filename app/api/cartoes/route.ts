@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       status: body.status ?? 'todo',
       projetoId: body.projetoId,
       membroId: body.membroId ?? null,
+      iniciadoEm: body.membroId ? new Date() : null,
     },
   })
 

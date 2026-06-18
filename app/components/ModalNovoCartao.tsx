@@ -7,31 +7,24 @@ type Membro = {
   nome: string
 }
 
-type Projeto = {
-  id: number
-  nome: string
-}
-
 type Props = {
   onFechar: () => void
   onCriado: () => void
+  projetoId: number
 }
 
-export default function ModalNovoCartao({ onFechar, onCriado }: Props) {
+export default function ModalNovoCartao({ onFechar, onCriado, projetoId }: Props) {
   const [membros, setMembros] = useState<Membro[]>([])
-  const [projetos, setProjetos] = useState<Projeto[]>([])
   const [titulo, setTitulo] = useState('')
   const [descricao, setDescricao] = useState('')
-  const [projetoId, setProjetoId] = useState('')
   const [membroId, setMembroId] = useState('')
 
   useEffect(() => {
     fetch('/api/membros').then(r => r.json()).then(setMembros)
-    fetch('/api/projetos').then(r => r.json()).then(setProjetos)
   }, [])
 
   async function handleCriar() {
-    if (!titulo || !projetoId) return
+    if (!titulo) return
 
     await fetch('/api/cartoes', {
       method: 'POST',
@@ -39,7 +32,7 @@ export default function ModalNovoCartao({ onFechar, onCriado }: Props) {
       body: JSON.stringify({
         titulo,
         descricao,
-        projetoId: Number(projetoId),
+        projetoId,
         membroId: membroId ? Number(membroId) : null,
       }),
     })
@@ -69,17 +62,6 @@ export default function ModalNovoCartao({ onFechar, onCriado }: Props) {
             onChange={e => setDescricao(e.target.value)}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-blue-400"
           />
-
-          <select
-            value={projetoId}
-            onChange={e => setProjetoId(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-blue-400"
-          >
-            <option value="">Selecione o projeto</option>
-            {projetos.map(p => (
-              <option key={p.id} value={p.id}>{p.nome}</option>
-            ))}
-          </select>
 
           <select
             value={membroId}

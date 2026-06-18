@@ -21,7 +21,7 @@ type Projeto = {
 
 export default function ProjetoPage() {
   const [projetos, setProjetos] = useState<Projeto[]>([])
-  const [modalAberto, setModalAberto] = useState(false)
+  const [modalProjetoId, setModalProjetoId] = useState<number | null>(null)
   const [recarregar, setRecarregar] = useState(0)
 
   useEffect(() => {
@@ -36,10 +36,11 @@ export default function ProjetoPage() {
 
   return (
     <main className="min-h-screen p-6 bg-gray-50">
-      {modalAberto && (
+      {modalProjetoId !== null && (
         <ModalNovoCartao
-          onFechar={() => setModalAberto(false)}
+          onFechar={() => setModalProjetoId(null)}
           onCriado={handleCriado}
+          projetoId={modalProjetoId}
         />
       )}
       <div className="flex justify-between items-center mb-6">
@@ -47,12 +48,6 @@ export default function ProjetoPage() {
           <a href="/" className="text-sm text-blue-600 hover:underline block mb-1">← Voltar ao painel</a>
           <h1 className="text-2xl font-bold text-gray-800">Projetos</h1>
         </div>
-        <button
-          onClick={() => setModalAberto(true)}
-          className="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          + Novo cartao
-        </button>
       </div>
       <div className="flex flex-col gap-6">
         {projetos.map(projeto => {
@@ -67,9 +62,17 @@ export default function ProjetoPage() {
             <div key={projeto.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-semibold text-gray-800">{projeto.nome}</h2>
-                <span className={diasRestantes <= 30 ? 'text-sm px-3 py-1 rounded-full font-medium bg-red-100 text-red-700' : 'text-sm px-3 py-1 rounded-full font-medium bg-green-100 text-green-700'}>
-                  {diasRestantes} dias restantes
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={diasRestantes <= 30 ? 'text-sm px-3 py-1 rounded-full font-medium bg-red-100 text-red-700' : 'text-sm px-3 py-1 rounded-full font-medium bg-green-100 text-green-700'}>
+                    {diasRestantes} dias restantes
+                  </span>
+                  <button
+                    onClick={() => setModalProjetoId(projeto.id)}
+                    className="text-sm bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    + Novo cartao
+                  </button>
+                </div>
               </div>
               <div className="mb-4">
                 <div className="flex justify-between text-sm text-gray-500 mb-1">

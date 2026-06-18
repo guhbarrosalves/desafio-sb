@@ -22,6 +22,21 @@ type Props = {
   key?: number
 }
 
+function formatTempoRelativo(dataIso: string): string {
+  const data = new Date(dataIso)
+  const agora = new Date()
+  const diffMs = agora.getTime() - data.getTime()
+
+  const diffMin = Math.floor(diffMs / (1000 * 60))
+  const diffHoras = Math.floor(diffMin / 60)
+  const diffDias = Math.floor(diffHoras / 24)
+
+  if (diffDias > 0) return `pego há ${diffDias} ${diffDias === 1 ? 'dia' : 'dias'}`
+  if (diffHoras > 0) return `pego há ${diffHoras} ${diffHoras === 1 ? 'hora' : 'horas'}`
+  if (diffMin > 0) return `pego há ${diffMin} ${diffMin === 1 ? 'minuto' : 'minutos'}`
+  return 'pego agora mesmo'
+}
+
 export default function KanbanBoard({ projetoId }: Props) {
   const [cartoes, setCartoes] = useState<Cartao[]>([])
 
@@ -52,6 +67,9 @@ export default function KanbanBoard({ projetoId }: Props) {
                 <p className="font-medium text-gray-800">{cartao.titulo}</p>
                 {cartao.membro && (
                   <p className="text-sm text-gray-500 mt-1">{cartao.membro.nome}</p>
+                )}
+                {cartao.iniciadoEm && (
+                  <p className="text-xs text-gray-400 mt-1">{formatTempoRelativo(cartao.iniciadoEm)}</p>
                 )}
               </div>
             ))}
