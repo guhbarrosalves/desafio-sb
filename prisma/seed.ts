@@ -40,7 +40,7 @@ async function main() {
   const projeto1 = await prisma.projeto.create({
     data: {
       nome: "Redesign do Site Institucional",
-      prazo: new Date("2026-07-15"), // prazo próximo — urgente
+      prazo: new Date("2026-07-20"), // prazo próximo — urgente
     },
   })
 

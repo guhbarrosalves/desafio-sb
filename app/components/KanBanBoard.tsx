@@ -14,31 +14,37 @@ type Cartao = {
   status: string
   iniciadoEm: string | null
   membro: Membro | null
+  projetoId: number
 }
 
-export default function KanbanBoard() {
+type Props = {
+  projetoId: number
+  key?: number
+}
+
+export default function KanbanBoard({ projetoId }: Props) {
   const [cartoes, setCartoes] = useState<Cartao[]>([])
 
   useEffect(() => {
     fetch('/api/cartoes')
       .then(res => res.json())
-      .then(data => setCartoes(data))
-  }, [])
+      .then(data => setCartoes(data.filter((c: Cartao) => c.projetoId === projetoId)))
+  }, [projetoId])
 
-  const todo   = cartoes.filter(c => c.status === 'todo')
-  const doing  = cartoes.filter(c => c.status === 'doing')
-  const done   = cartoes.filter(c => c.status === 'done')
+  const todo  = cartoes.filter(c => c.status === 'todo')
+  const doing = cartoes.filter(c => c.status === 'doing')
+  const done  = cartoes.filter(c => c.status === 'done')
 
   const colunas = [
-    { label: 'A fazer',     cor: 'bg-gray-200',   cartoes: todo  },
-    { label: 'Em andamento',cor: 'bg-blue-100',   cartoes: doing },
-    { label: 'Concluído',   cor: 'bg-green-100',  cartoes: done  },
+    { label: 'A fazer',      cor: 'bg-gray-200',  cartoes: todo  },
+    { label: 'Em andamento', cor: 'bg-blue-100',  cartoes: doing },
+    { label: 'Concluido',    cor: 'bg-green-100', cartoes: done  },
   ]
 
   return (
     <div className="grid grid-cols-3 gap-4">
       {colunas.map(coluna => (
-        <div key={coluna.label} className={`rounded-lg p-4 ${coluna.cor}`}>
+        <div key={coluna.label} className={'rounded-lg p-4 ' + coluna.cor}>
           <h2 className="font-semibold text-gray-700 mb-3">{coluna.label}</h2>
           <div className="flex flex-col gap-2">
             {coluna.cartoes.map(cartao => (

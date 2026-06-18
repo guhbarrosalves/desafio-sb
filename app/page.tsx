@@ -13,17 +13,31 @@ type Membro = {
   cargo: string
 }
 
+type Projeto = {
+  id: number
+  nome: string
+}
+
 export default function Home() {
   const [usuario, setUsuario] = useState<Membro | null>(null)
   const [modalAberto, setModalAberto] = useState(false)
   const [recarregar, setRecarregar] = useState(0)
+  const [projetos, setProjetos] = useState<Projeto[]>([])
+  const [projetoAtivo, setProjetoAtivo] = useState<number | null>(null)
 
   useEffect(() => {
     const salvo = localStorage.getItem('usuario')
-    if (salvo) {
-      setUsuario(JSON.parse(salvo))
-    }
+    if (salvo) setUsuario(JSON.parse(salvo))
   }, [])
+
+  useEffect(() => {
+    fetch('/api/projetos')
+      .then(res => res.json())
+      .then(data => {
+        setProjetos(data)
+        if (data.length > 0) setProjetoAtivo(data[0].id)
+      })
+  }, [recarregar])
 
   function handleSelecionar(membro: Membro) {
     localStorage.setItem('usuario', JSON.stringify(membro))
@@ -48,14 +62,20 @@ export default function Home() {
   if (ehGestor) {
     return (
       <main className="min-h-screen p-6 bg-gray-50">
-        {modalAberto && (
+        {modalAberto && projetoAtivo && (
           <ModalNovoCartao
             onFechar={() => setModalAberto(false)}
             onCriado={handleCriado}
+            projetoId={projetoAtivo}
           />
         )}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Painel do Time</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Painel do Time</h1>
+            <div className="flex gap-4 mt-1">
+              <a href="/funcionarios" className="text-sm text-blue-500 hover:underline">Funcionarios</a>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setModalAberto(true)}
@@ -68,7 +88,18 @@ export default function Home() {
           </div>
         </div>
         <KpiPanel key={recarregar} />
-        <KanbanBoard key={recarregar + 1000} />
+        <div className="flex gap-2 mb-4 mt-6">
+          {projetos.map(p => (
+            <button
+              key={p.id}
+              onClick={() => setProjetoAtivo(p.id)}
+              className={projetoAtivo === p.id ? 'px-4 py-2 rounded-lg text-sm font-medium bg-blue-500 text-white' : 'px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-blue-400'}
+            >
+              {p.nome}
+            </button>
+          ))}
+        </div>
+        {projetoAtivo && <KanbanBoard key={recarregar + '-' + projetoAtivo} projetoId={projetoAtivo} />}
       </main>
     )
   }
